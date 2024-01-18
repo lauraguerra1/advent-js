@@ -4,49 +4,56 @@ const filePath = './day3/data.txt';
 
 fs.readFile(filePath, 'utf8', (err, data) => {
   if (err) {
-      console.error('Error reading the file:', err);
-      return;
+    console.error('Error reading the file:', err);
+    return;
   }
 
   const lines = data.split('\n');
 
-  const total = lines.reduce((acc, line, i) => {    
-    const prevParts = lines[i - 1]?.split('')
-    const currentParts = line.split('')
-    const nextParts = lines[i + 1]?.split('')
-    
+  const checkSidesForSymbols = (line, currentIndex, hasSymbol) => {
+    [-1, 0, 1].forEach((num) => {
+      if (line && line[currentIndex + num] && isNaN(line[currentIndex + num]) && line[currentIndex + num] !== '.') {
+        hasSymbol = true;
+      }
+    });
+    return hasSymbol;
+  };
+
+  const checkPerimiterForSymbols = (lines, currentIndex, hasSymbol) => {
+    lines.forEach((line) => {
+      hasSymbol = checkSidesForSymbols(line, currentIndex, hasSymbol)
+    });
+    return hasSymbol;
+  }
+
+  const total = lines.reduce((acc, line, i) => {
+    const prevParts = lines[i - 1]?.split('');
+    const currentParts = line.split('');
+    const nextParts = lines[i + 1]?.split('');
+
     const lineTotal = currentParts.reduce((total, part, index) => {
-      let number = ''
-      let focus = index
+      let number = '';
+      let currentIndex = index;
       let hasSymbol = false;
 
-      if (isNaN(currentParts[index - 1])) {   
-        while (!isNaN(parseInt(currentParts[focus]))) {
-          number += currentParts[focus];
-          [-1, 0, 1].forEach(num => {
-            
-            if (prevParts && prevParts[focus + num] && isNaN(prevParts[focus + num]) && prevParts[focus + num] !== '.') {
-              hasSymbol = true
-            } else if (nextParts && nextParts[focus + num] && isNaN(nextParts[focus + num]) && nextParts[focus + num] !== '.') {
-              hasSymbol = true
-            } else if (currentParts[focus + num] && isNaN(currentParts[focus + num]) && currentParts[focus + num] !== '.') {
-              hasSymbol = true
-            }
-          })
-          focus ++
+      if (isNaN(currentParts[index - 1])) {
+        while (!isNaN(parseInt(currentParts[currentIndex]))) {
+          number += currentParts[currentIndex];
+          hasSymbol = checkPerimiterForSymbols([prevParts, nextParts, currentParts], currentIndex, hasSymbol)
+          currentIndex++;
         }
       }
 
       if (hasSymbol) {
-        total += parseInt(number)
-      }   
-      
-      return total
-    }, 0)
-    
+        total += parseInt(number);
+      }
+
+      return total;
+    }, 0);
+
     acc += parseInt(lineTotal);
-    return acc;  
+    return acc;
   }, 0);
-  
-  console.log( total);
+
+  console.log(total);
 });
