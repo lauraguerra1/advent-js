@@ -14,12 +14,10 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     const cardNums = currentLine.split('|')[1].split(' ').filter(item => item !== '');
 
     const linePoints = cardNums.reduce((total, currentNum) => {
-      if (!total && winningNums.includes(currentNum)) {
-        total += 1;
-      } else if (winningNums.includes(currentNum)) {
-        total *= 2;
+      if (winningNums.includes(currentNum)) {
+        !total ? total += 1 : total *= 2;
       }
-      
+
       return total;
     }, 0)
 
